@@ -1,0 +1,22 @@
+spring:
+  kafka:
+    consumer:
+      bootstrap-servers: address
+      group-id: notification-service-group-id
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: username
+    password: password
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+kafka-topics:
+  created-user: created_user_topic
+  updated-user: updated_user_topic
+  deleted-user: deleted_user_topic
+server:
+  port: 8081

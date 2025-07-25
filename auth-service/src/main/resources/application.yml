@@ -1,0 +1,19 @@
+spring:
+  flyway:
+    locations: classpath:db_migration
+    baseline-on-migrate: true
+  datasource:
+    driver-class-name: org.postgresql.Driver
+    url: url
+    username: username
+    password: password
+  kafka:
+    producer:
+      bootstrap-servers: address
+jwt:
+  secret: SECRET
+  storage-days: 14
+kafka-topics:
+  created-user: created_user_topic
+  updated-user: updated_user_topic
+  deleted-user: deleted_user_topic

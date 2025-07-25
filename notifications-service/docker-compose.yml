@@ -1,0 +1,44 @@
+services:
+  notification-service:
+    build:
+      context: .
+    environment:
+      - SPRING_KAFKA_CONSUMER_BOOTSTRAP-SERVERS=kafka:9092
+    ports:
+      - 8081:8081
+    depends_on:
+      - kafka
+    networks:
+      - krainet-test-task-net
+    restart: unless-stopped
+
+  kafka:
+    environment:
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092,PLAINTEXT_HOST://localhost:9093
+      KAFKA_BROKER_ID: 1
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:32181
+    image: confluentinc/cp-kafka:latest
+    networks:
+      - krainet-test-task-net
+    ports:
+      - 9093:9093
+      - 9092:9092
+    depends_on:
+      - zookeeper
+    restart: unless-stopped
+
+  zookeeper:
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 32181
+      ZOOKEEPER_TICK_TIME: 2000
+    image: confluentinc/cp-zookeeper:latest
+    networks:
+      - krainet-test-task-net
+    ports:
+      - 32181:32181
+networks:
+  krainet-test-task-net:
+    external: true
+    name: krainet-test-task-net
