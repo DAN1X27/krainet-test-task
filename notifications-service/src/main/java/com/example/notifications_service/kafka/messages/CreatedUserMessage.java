@@ -1,9 +1,9 @@
-package com.example.notifications_service.dto;
+package com.example.notifications_service.kafka.messages;
 
 import lombok.Data;
 
 @Data
-public class UserDTO {
+public class CreatedUserMessage {
 
     private String username;
 

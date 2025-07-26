@@ -2,6 +2,7 @@ package com.example.auth_service.services;
 
 import com.example.auth_service.dto.ShowUserDTO;
 import com.example.auth_service.dto.UpdateUserDTO;
+import com.example.auth_service.kafka.producers.NotificationProducer;
 import com.example.auth_service.mapper.UserMapper;
 import com.example.auth_service.models.User;
 import com.example.auth_service.repositories.UsersRepository;
@@ -26,7 +27,7 @@ public class AdminUserService {
 
     private final UserService userService;
 
-    private final KafkaProducerService producerService;
+    private final NotificationProducer notificationProducer;
 
     public List<ShowUserDTO> findAll(int page, int size) {
         List<User> users = usersRepository.findAll(
@@ -51,7 +52,7 @@ public class AdminUserService {
         User user = findById(id);
         boolean updated = userService.update(user, updateUserDTO);
         if (updated && user.getRole() == User.Role.ROLE_USER) {
-            producerService.sendUpdatedUserMessage(user);
+            notificationProducer.sendUpdatedUserNotification(user);
         }
         log.info("Updated user by admin with username - {}", user.getUsername());
     }
@@ -61,7 +62,7 @@ public class AdminUserService {
         User user = findById(id);
         usersRepository.delete(user);
         if (user.getRole() == User.Role.ROLE_USER) {
-            producerService.sendDeletedUserMessage(user);
+            notificationProducer.sendDeletedUserNotification(user);
         }
         log.info("Deleted user by admin with username - {}", user.getUsername());
     }

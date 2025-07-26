@@ -1,9 +1,9 @@
-package com.example.auth_service.dto;
+package com.example.auth_service.kafka.messages;
 
 import lombok.Data;
 
 @Data
-public class KafkaUserDTO {
+public class CreatedUserMessage {
 
     private String username;
 

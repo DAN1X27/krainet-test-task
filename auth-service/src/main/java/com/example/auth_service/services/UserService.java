@@ -3,6 +3,7 @@ package com.example.auth_service.services;
 import com.example.auth_service.dto.CreateUserDTO;
 import com.example.auth_service.dto.ShowUserDTO;
 import com.example.auth_service.dto.UpdateUserDTO;
+import com.example.auth_service.kafka.producers.NotificationProducer;
 import com.example.auth_service.mapper.UserMapper;
 import com.example.auth_service.models.User;
 import com.example.auth_service.repositories.UsersRepository;
@@ -28,7 +29,7 @@ public class UserService {
 
     private final UserMapper mapper;
 
-    private final KafkaProducerService producerService;
+    private final NotificationProducer notificationProducer;
 
     public ShowUserDTO show() {
         return mapper.toShowDTO(getCurrentUser());
@@ -41,7 +42,7 @@ public class UserService {
         user.setPassword(passwordEncoder.encode(createUserDTO.getPassword()));
         user.setRole(User.Role.ROLE_USER);
         usersRepository.save(user);
-        producerService.sendCreatedUserMessage(user);
+        notificationProducer.sendCreatedUserNotification(createUserDTO);
         log.info("Created new user with username - {}", createUserDTO.getUsername());
     }
 
@@ -51,7 +52,7 @@ public class UserService {
                 .orElseThrow(() -> new IllegalStateException("User not found"));
         boolean updated = update(user, updateUserDTO);
         if (updated && user.getRole() == User.Role.ROLE_USER) {
-            producerService.sendUpdatedUserMessage(user);
+            notificationProducer.sendUpdatedUserNotification(user);
         }
         log.info("Updated user with username - {}", user.getUsername());
     }
@@ -61,7 +62,7 @@ public class UserService {
         User user = getCurrentUser();
         usersRepository.delete(user);
         if (user.getRole() == User.Role.ROLE_USER) {
-            producerService.sendDeletedUserMessage(user);
+            notificationProducer.sendDeletedUserNotification(user);
         }
         log.info("Deleted user with username - {}", user.getUsername());
     }

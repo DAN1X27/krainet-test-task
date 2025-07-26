@@ -1,6 +1,7 @@
 package com.example.notifications_service.config;
 
-import com.example.notifications_service.dto.UserDTO;
+import com.example.notifications_service.kafka.messages.CreatedUserMessage;
+import com.example.notifications_service.kafka.messages.UserMessage;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.common.serialization.StringDeserializer;
 import org.springframework.beans.factory.annotation.Value;
@@ -17,7 +18,7 @@ import java.util.Map;
 
 @Configuration
 @EnableKafka
-public class KafkaConsumerConfig {
+public class KafkaConsumersConfig {
 
     @Value("${spring.kafka.consumer.bootstrap-servers}")
     private String bootstrapServers;
@@ -26,15 +27,40 @@ public class KafkaConsumerConfig {
     private String groupId;
 
     @Bean
-    public ConcurrentKafkaListenerContainerFactory<String, UserDTO> containerFactory() {
-        ConcurrentKafkaListenerContainerFactory<String, UserDTO> factory =
+    public ConcurrentKafkaListenerContainerFactory<String, UserMessage> userMessageContainerFactory() {
+        ConcurrentKafkaListenerContainerFactory<String, UserMessage> factory =
                 new ConcurrentKafkaListenerContainerFactory<>();
-        factory.setConsumerFactory(consumerFactory());
+        factory.setConsumerFactory(userMessageConsumerFactory());
         return factory;
     }
 
     @Bean
-    ConsumerFactory<String, UserDTO> consumerFactory() {
+    public ConcurrentKafkaListenerContainerFactory<String, CreatedUserMessage> createdUserMessageContainerFactory() {
+        ConcurrentKafkaListenerContainerFactory<String, CreatedUserMessage> factory =
+                new ConcurrentKafkaListenerContainerFactory<>();
+        factory.setConsumerFactory(createdUserMessageConsumerFactory());
+        return factory;
+    }
+
+    @Bean
+    ConsumerFactory<String, CreatedUserMessage> createdUserMessageConsumerFactory() {
+        return new DefaultKafkaConsumerFactory<>(
+                getProps(),
+                new StringDeserializer(),
+                new JsonDeserializer<>(CreatedUserMessage.class)
+        );
+    }
+
+    @Bean
+    ConsumerFactory<String, UserMessage> userMessageConsumerFactory() {
+        return new DefaultKafkaConsumerFactory<>(
+                getProps(),
+                new StringDeserializer(),
+                new JsonDeserializer<>(UserMessage.class)
+        );
+    }
+
+    private Map<String, Object> getProps() {
         Map<String, Object> props = new HashMap<>();
         props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
         props.put(ConsumerConfig.GROUP_ID_CONFIG, groupId);
@@ -42,11 +68,7 @@ public class KafkaConsumerConfig {
         props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, JsonDeserializer.class);
         props.put(JsonDeserializer.USE_TYPE_INFO_HEADERS, "false");
         props.put(JsonDeserializer.TRUSTED_PACKAGES, "*");
-        return new DefaultKafkaConsumerFactory<>(
-                props,
-                new StringDeserializer(),
-                new JsonDeserializer<>(UserDTO.class)
-        );
+        return props;
     }
 
 }

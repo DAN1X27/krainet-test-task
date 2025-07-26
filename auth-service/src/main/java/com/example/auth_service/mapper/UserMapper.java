@@ -1,7 +1,8 @@
 package com.example.auth_service.mapper;
 
 import com.example.auth_service.dto.CreateUserDTO;
-import com.example.auth_service.dto.KafkaUserDTO;
+import com.example.auth_service.kafka.messages.CreatedUserMessage;
+import com.example.auth_service.kafka.messages.UserMessage;
 import com.example.auth_service.dto.ShowUserDTO;
 import com.example.auth_service.models.User;
 import org.mapstruct.Mapper;
@@ -20,6 +21,7 @@ public interface UserMapper {
 
     ShowUserDTO toShowDTO(User user);
 
-    KafkaUserDTO toKafkaUserDTO(User user);
+    UserMessage toUserNotificationDTO(User user);
 
+    CreatedUserMessage toCreatedUserNotificationDTOFromCreateDTO(CreateUserDTO createUserDTO);
 }
